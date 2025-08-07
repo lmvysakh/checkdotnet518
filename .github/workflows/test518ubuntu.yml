@@ -17,81 +17,74 @@ jobs:
       - name: Set up runner label
         run: echo "Running on ${{ matrix.ubuntu-label }}"
 
-      - name: Determine writable dotnet install directory
-        id: dotnet-dir
+      - name: Detect writable dotnet install directory
+        id: dotnetdir
         shell: bash
         run: |
-          # 1. Priority: User-supplied DOTNET_INSTALL_DIR
-          if [ -n "${DOTNET_INSTALL_DIR}" ]; then
-            echo "Using user-supplied DOTNET_INSTALL_DIR: ${DOTNET_INSTALL_DIR}"
-            echo "install-dir=${DOTNET_INSTALL_DIR}" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # 2. Priority: /usr/share/dotnet if writable
+          # Try /usr/share/dotnet first
           if [ -d "/usr/share/dotnet" ]; then
             if [ -w "/usr/share/dotnet" ]; then
-              echo "/usr/share/dotnet exists and is writable."
-              echo "install-dir=/usr/share/dotnet" >> $GITHUB_OUTPUT
+              echo "Writable: /usr/share/dotnet"
+              echo "dir=/usr/share/dotnet" >> $GITHUB_OUTPUT
               exit 0
             else
-              echo "/usr/share/dotnet exists but is NOT writable."
+              echo "/usr/share/dotnet exists but is not writable"
             fi
           else
-            # Try to create the directory to check permissions
+            # Try to create it if it doesn't exist
             mkdir -p /usr/share/dotnet 2>/dev/null
             if [ $? -eq 0 ]; then
-              echo "Created /usr/share/dotnet, directory is writable."
-              echo "install-dir=/usr/share/dotnet" >> $GITHUB_OUTPUT
+              echo "Created and writable: /usr/share/dotnet"
+              echo "dir=/usr/share/dotnet" >> $GITHUB_OUTPUT
               exit 0
             else
-              echo "Cannot create /usr/share/dotnet, directory is NOT writable."
+              echo "Cannot create /usr/share/dotnet"
             fi
           fi
 
-          # 3. Priority: $HOME/.dotnet if writable
+          # Next, try $HOME/.dotnet
           if [ -d "$HOME/.dotnet" ]; then
             if [ -w "$HOME/.dotnet" ]; then
-              echo "$HOME/.dotnet exists and is writable."
-              echo "install-dir=$HOME/.dotnet" >> $GITHUB_OUTPUT
+              echo "Writable: $HOME/.dotnet"
+              echo "dir=$HOME/.dotnet" >> $GITHUB_OUTPUT
               exit 0
             else
-              echo "$HOME/.dotnet exists but is NOT writable."
+              echo "$HOME/.dotnet exists but is not writable"
             fi
           else
             mkdir -p "$HOME/.dotnet"
             if [ $? -eq 0 ]; then
-              echo "Created $HOME/.dotnet, directory is writable."
-              echo "install-dir=$HOME/.dotnet" >> $GITHUB_OUTPUT
+              echo "Created and writable: $HOME/.dotnet"
+              echo "dir=$HOME/.dotnet" >> $GITHUB_OUTPUT
               exit 0
             else
-              echo "Cannot create $HOME/.dotnet, directory is NOT writable."
+              echo "Cannot create $HOME/.dotnet"
             fi
           fi
 
-          # 4. Priority: $RUNNER_TEMP/.dotnet as last fallback
+          # Last, try $RUNNER_TEMP/.dotnet
           mkdir -p "$RUNNER_TEMP/.dotnet"
           if [ $? -eq 0 ]; then
-            echo "Created $RUNNER_TEMP/.dotnet, directory is writable."
-            echo "install-dir=$RUNNER_TEMP/.dotnet" >> $GITHUB_OUTPUT
+            echo "Created and writable: $RUNNER_TEMP/.dotnet"
+            echo "dir=$RUNNER_TEMP/.dotnet" >> $GITHUB_OUTPUT
             exit 0
           else
-            echo "Cannot create $RUNNER_TEMP/.dotnet, action will likely fail."
-            echo "install-dir=" >> $GITHUB_OUTPUT
+            echo "Cannot create $RUNNER_TEMP/.dotnet, setup will likely fail!"
+            echo "dir=" >> $GITHUB_OUTPUT
             exit 1
           fi
 
-      - name: Setup .NET with chosen install directory
+      - name: Setup .NET using detected install directory
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
-          dotnet-install-dir: ${{ steps.dotnet-dir.outputs.install-dir }}
+          dotnet-install-dir: ${{ steps.dotnetdir.outputs.dir }}
 
       - name: Print dotnet info and installation directories
         run: |
           echo "Dotnet info:"
           dotnet --info || echo "dotnet not installed"
-          echo "Used install directory: ${{ steps.dotnet-dir.outputs.install-dir }}"
+          echo "Used install directory: ${{ steps.dotnetdir.outputs.dir }}"
           echo "Checking /usr/share/dotnet:"
           ls -al /usr/share/dotnet || echo "/usr/share/dotnet does not exist or inaccessible"
           echo "Checking /usr/lib/dotnet:"
