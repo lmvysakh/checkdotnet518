@@ -20,62 +20,13 @@ jobs:
       - name: Set up runner label
         run: echo "Running on ${{ matrix.ubuntu-label }}"
 
-      - name: Detect writable dotnet install directory
+      # Updated: Always use $RUNNER_TEMP/.dotnet for install dir
+      - name: Set dotnet install directory
         id: dotnetdir
-        shell: bash
         run: |
-          # Try /usr/share/dotnet first
-          if [ -d "/usr/share/dotnet" ]; then
-            if [ -w "/usr/share/dotnet" ]; then
-              echo "Writable: /usr/share/dotnet"
-              echo "dir=/usr/share/dotnet" >> $GITHUB_OUTPUT
-              exit 0
-            else
-              echo "/usr/share/dotnet exists but is not writable"
-            fi
-          else
-            # Try to create it if it doesn't exist
-            mkdir -p /usr/share/dotnet 2>/dev/null
-            if [ $? -eq 0 ]; then
-              echo "Created and writable: /usr/share/dotnet"
-              echo "dir=/usr/share/dotnet" >> $GITHUB_OUTPUT
-              exit 0
-            else
-              echo "Cannot create /usr/share/dotnet"
-            fi
-          fi
-
-          # Next, try $HOME/.dotnet
-          if [ -d "$HOME/.dotnet" ]; then
-            if [ -w "$HOME/.dotnet" ]; then
-              echo "Writable: $HOME/.dotnet"
-              echo "dir=$HOME/.dotnet" >> $GITHUB_OUTPUT
-              exit 0
-            else
-              echo "$HOME/.dotnet exists but is not writable"
-            fi
-          else
-            mkdir -p "$HOME/.dotnet"
-            if [ $? -eq 0 ]; then
-              echo "Created and writable: $HOME/.dotnet"
-              echo "dir=$HOME/.dotnet" >> $GITHUB_OUTPUT
-              exit 0
-            else
-              echo "Cannot create $HOME/.dotnet"
-            fi
-          fi
-
-          # Last, try $RUNNER_TEMP/.dotnet
-          mkdir -p "$RUNNER_TEMP/.dotnet"
-          if [ $? -eq 0 ]; then
-            echo "Created and writable: $RUNNER_TEMP/.dotnet"
-            echo "dir=$RUNNER_TEMP/.dotnet" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "Cannot create $RUNNER_TEMP/.dotnet, setup will likely fail!"
-            echo "dir=" >> $GITHUB_OUTPUT
-            exit 1
-          fi
+          DOTNET_DIR="${RUNNER_TEMP}/.dotnet"
+          mkdir -p "$DOTNET_DIR"
+          echo "dir=$DOTNET_DIR" >> $GITHUB_OUTPUT
 
       - name: Set DOTNET_ROOT environment variable
         run: |
