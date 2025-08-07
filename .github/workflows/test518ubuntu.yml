@@ -2,6 +2,9 @@ name: Reproduce setup-dotnet Permission Issue on Ubuntu Self-hosted Runners
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   ubuntu-dotnet-install-test:
@@ -9,7 +12,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        ubuntu-label: [ubuntu-24.04]
+        ubuntu-label: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -73,6 +76,14 @@ jobs:
             echo "dir=" >> $GITHUB_OUTPUT
             exit 1
           fi
+
+      - name: Set DOTNET_ROOT environment variable
+        run: |
+          echo "DOTNET_ROOT=${{ steps.dotnetdir.outputs.dir }}" >> $GITHUB_ENV
+
+      - name: Add .NET to PATH
+        run: |
+          echo "${{ steps.dotnetdir.outputs.dir }}" >> $GITHUB_PATH
 
       - name: Setup .NET using detected install directory
         uses: actions/setup-dotnet@v4
