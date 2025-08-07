@@ -5,7 +5,7 @@ on:
 
 jobs:
   windows-dotnet-install-test:
-    runs-on: [self-hosted, windows]
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
