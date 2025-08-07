@@ -1,0 +1,35 @@
+name: Reproduce setup-dotnet Permission Issue on Ubuntu Self-hosted Runners
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ubuntu-dotnet-install-test:
+    name: Ubuntu Dotnet Install Test (Self-hosted)
+    runs-on: [self-hosted, ${{ matrix.ubuntu-label }}]
+    strategy:
+      matrix:
+        ubuntu-label: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET (expecting possible permission issue)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: [6.0.x, 7.0.x, 8.0.x]
+
+      - name: Print dotnet info and installation directories
+        run: |
+          echo "Dotnet info:"
+          dotnet --info || echo "dotnet not installed"
+          echo "Checking /usr/share/dotnet:"
+          ls -al /usr/share/dotnet || echo "/usr/share/dotnet does not exist or inaccessible"
+          echo "Checking /usr/lib/dotnet:"
+          ls -al /usr/lib/dotnet || echo "/usr/lib/dotnet does not exist or inaccessible"
+          echo "Checking $HOME/.dotnet:"
+          ls -al $HOME/.dotnet || echo "$HOME/.dotnet does not exist or inaccessible"
+          echo "Checking $RUNNER_TEMP/.dotnet:"
+          ls -al $RUNNER_TEMP/.dotnet || echo "$RUNNER_TEMP/.dotnet does not exist or inaccessible"
+          echo "Current user:"
+          whoami
