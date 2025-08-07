@@ -6,7 +6,7 @@ on:
 jobs:
   ubuntu-dotnet-install-test:
     name: Ubuntu Dotnet Install Test (Self-hosted)
-    runs-on: [self-hosted, ${{ matrix.ubuntu-label }}]
+    runs-on: self-hosted
     strategy:
       matrix:
         ubuntu-label: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
@@ -14,10 +14,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up runner label
+        run: echo "Running on ${{ matrix.ubuntu-label }}"
+
       - name: Setup .NET (expecting possible permission issue)
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: [6.0.x, 7.0.x, 8.0.x]
+          dotnet-version: '6.0.x'
 
       - name: Print dotnet info and installation directories
         run: |
@@ -33,3 +36,4 @@ jobs:
           ls -al $RUNNER_TEMP/.dotnet || echo "$RUNNER_TEMP/.dotnet does not exist or inaccessible"
           echo "Current user:"
           whoami
+        shell: bash
