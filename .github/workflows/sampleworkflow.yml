@@ -1,6 +1,9 @@
 name: Test setup-python on Node 20
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 jobs:
   test:
     runs-on: self-hosted
@@ -20,7 +23,7 @@ jobs:
       - name: Use PR branch of setup-python
         uses: salmanmkc/setup-python@node24
         with:
-          python-version: 3.10
+          python-version: "3.12"
       - name: Confirm Python version
         run: python --version
 
