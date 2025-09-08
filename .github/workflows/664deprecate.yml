@@ -19,3 +19,11 @@ jobs:
 
       - name: Display .NET version
         run: dotnet --version
+
+      # Optionally, add a step to collect and display node warnings
+      - name: Print Node.js version
+        run: node --version
+
+      # Optionally, add a step to make the warning more visible in the logs
+      - name: Trigger node deprecation trace (for debugging)
+        run: node --trace-deprecation -e "require('punycode')"
