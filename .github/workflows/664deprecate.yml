@@ -8,7 +8,7 @@ jobs:
   setup-dotnet:
     runs-on: ubuntu-latest
     env:
-      NODE_OPTIONS: --trace-deprecation --trace-warnings
+      NODE_OPTIONS: --trace-deprecation --trace-module-resolve
 
     steps:
       - name: Checkout repository
