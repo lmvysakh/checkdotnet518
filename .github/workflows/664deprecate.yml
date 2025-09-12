@@ -19,3 +19,6 @@ jobs:
 
       - name: Display .NET version
         run: dotnet --version
+
+      - name: Show npm dependency tree for uri-js and punycode
+        run: npm ls uri-js punycode || true
