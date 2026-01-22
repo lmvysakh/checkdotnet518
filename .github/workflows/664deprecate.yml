@@ -18,8 +18,8 @@ jobs:
         # uses: lmvysakh/setup-dotnet@resolve_punycode
         # uses: lmvysakh/setup-dotnet@resolve_punycode_4
         # uses: aparnajyothi-y/setup-dotnet@fix-punycode-warning-deprication
-        # uses: actions/setup-dotnet@v5
-        uses: salmanmkc/setup-dotnet@fix/license-metadata
+        uses: actions/setup-dotnet@v5
+        # uses: salmanmkc/setup-dotnet@fix/license-metadata
         with:
           dotnet-version: 8.0.x
 
